@@ -91,11 +91,11 @@ public:
 				onstack.push_back(std::vector<bool>());
 
 				i = 0;
-				while ((a = sheet.get()) != '\n' && !sheet.eof()) {	//dodac tlumaczenie 4 i 5
+				while ((a = sheet.get()) != '\n' && !sheet.eof()) {	
 					
 					scheme[j].push_back(a);
 					
-					if (scheme[j][i] == ASCII_1) {	//scheme[wiersze(y)][kolumny(x)]
+					if (scheme[j][i] == ASCII_1) {
 						scheme[j][i] = WAY;
 					}
 					else if (scheme[j][i] == ASCII_0) {

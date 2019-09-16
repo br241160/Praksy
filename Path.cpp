@@ -6,7 +6,7 @@ void Cell::fun_printing_map() {
 	std::cout << "----WORKSPACE----\n\n";
 	for (int i = 0; i < scheme_size.second; i++) {
 		for (int j = 0; j < scheme_size.first; j++) {
-			std::cout << scheme[i][j];	//scheme[wiersze(y)][kolumny(x)]
+			std::cout << scheme[i][j];
 			if (j == scheme_size.first - 1) {
 				std::cout << std::endl;
 			}
@@ -26,7 +26,7 @@ bool Cell::func_checking_destination(const int x, const int y, Pair& dest) {
 }
 
 bool Cell::func_checking_cell(Pair& cell) {
-	if (scheme[cell.first][cell.second] == WAY || scheme[cell.first][cell.second] == BLCKD) {
+	if (scheme[cell.second][cell.first] == WAY || scheme[cell.second][cell.first] == BLCKD) {
 #ifdef _DEBUG
 		std::cout << cell.first << " " << cell.second << std::endl;
 		std::cout << "This cell is blocked" << std::endl;
@@ -44,24 +44,24 @@ void Cell:: func_drawing_path(Pair& dest, Pair& start) {
 	int prevx, prevy, tempprevx;
 	std::stack<Pair> grids_stack;
 
-	prevx = elem_info[dest.first][dest.second].m_parent_x;
+	prevx = elem_info[dest.second][dest.first].m_parent_x;
 	tempprevx = prevx;
-	prevy = elem_info[dest.first][dest.second].m_parent_y;
-	scheme[dest.first][dest.second] = 4;
+	prevy = elem_info[dest.second][dest.first].m_parent_y;
+	scheme[dest.second][dest.first] = 8;
 
 	while (prevx != -1 && prevy != -1) {
 		
-		if (scheme[prevx][prevy] != WAY) {
-			scheme[prevx][prevy] = WAY;
+		if (scheme[prevy][prevx] != WAY) {
+			scheme[prevy][prevx] = WAY;
 		}
 		grids_stack.push(std::make_pair(prevx, prevy));
 		
-		prevx = elem_info[prevx][prevy].m_parent_x;
-		prevy = elem_info[tempprevx][prevy].m_parent_y;
+		prevx = elem_info[prevy][prevx].m_parent_x;
+		prevy = elem_info[prevy][tempprevx].m_parent_y;
 		tempprevx = prevx;
 	}
 
-	scheme[start.first][start.second] = 4;
+	scheme[start.second][start.first] = 8;
 
 	func_grids_list(grids_stack, dest);	
 }
@@ -72,13 +72,13 @@ void Cell::func_drawing_way(Pair& start, Pair& end) {
 		if ((start.second - end.second) < 0) {
 			while (start.second != end.second) {
 				start.second++;
-				scheme[start.first][start.second] = PATH;
+				scheme[start.second][start.first] = PATH;
 			}
 		}
 		else if ((start.second - end.second) > 0) {
 			while (start.second != end.second) {
 				start.second--;
-				scheme[start.first][start.second] = PATH;
+				scheme[start.second][start.first] = PATH;
 			}
 		}
 	}
@@ -86,13 +86,13 @@ void Cell::func_drawing_way(Pair& start, Pair& end) {
 		if ((start.first - end.first) < 0) {
 			while (start.first != end.first) {
 				start.first++;
-				scheme[start.first][start.second] = PATH;
+				scheme[start.second][start.first] = PATH;
 			}
 		}
 		else if ((start.first - end.first) > 0) {
 			while (start.first != end.first) {
 				start.first--;
-				scheme[start.first][start.second] = PATH;
+				scheme[start.second][start.first] = PATH;
 			}
 		}
 	}
@@ -120,7 +120,7 @@ void Cell::func_grids_list(std::stack<Pair> grids_stack, Pair& dest) {
 	std::ofstream grids;
 	grids.open("grids_list.txt");
 	/*
-	if (!grids) {
+	if (grids_stack.empty()) {
 #ifdef _DEBUG
 		std::cout << "Couldn't open the file" << std::endl;
 #endif
@@ -131,9 +131,11 @@ void Cell::func_grids_list(std::stack<Pair> grids_stack, Pair& dest) {
 		std::cout << std::endl << "-----PATH-----" << std::endl;
 		std::cout << grids_stack.top().first << " " << grids_stack.top().second << std::endl;
 #endif
+		/*
 		func_drawing_way(path_nod, grids_stack.top());
 		path_nod.first = grids_stack.top().first;
 		path_nod.second = grids_stack.top().second;
+		*/
 		grids << grids_stack.top().first << " " << grids_stack.top().second << std::endl;
 
 		while (!grids_stack.empty()) {
@@ -143,8 +145,14 @@ void Cell::func_grids_list(std::stack<Pair> grids_stack, Pair& dest) {
 			else if (m_direction == HORIZONTAL && temp_grids.second != grids_stack.top().second) {
 				m_direction = VERTICAL;
 #ifdef _DEBUG
+				
 				std::cout << temp_grids.first << " " << temp_grids.second << std::endl;
 #endif
+				/*
+				func_drawing_way(path_nod, grids_stack.top());	//check
+				path_nod.first = grids_stack.top().first;
+				path_nod.second = grids_stack.top().second;
+				*/
 				grids << temp_grids.first << " " << temp_grids.second << std::endl;
 			}
 			else if (m_direction == VERTICAL && temp_grids.first == grids_stack.top().first) {
@@ -154,9 +162,11 @@ void Cell::func_grids_list(std::stack<Pair> grids_stack, Pair& dest) {
 #ifdef _DEBUG
 				std::cout << temp_grids.first << " " << temp_grids.second << std::endl;
 #endif	
+				/*
 				func_drawing_way(path_nod, grids_stack.top());
 				path_nod.first = grids_stack.top().first;
 				path_nod.second = grids_stack.top().second;
+				*/
 				grids << temp_grids.first << " " << temp_grids.second << std::endl;
 			}
 			func_drawing_way(path_nod, grids_stack.top());
@@ -168,6 +178,7 @@ void Cell::func_grids_list(std::stack<Pair> grids_stack, Pair& dest) {
 			grids_stack.pop();
 		}
 
+		func_drawing_way(path_nod, dest);
 		grids << temp_grids.first << " " << temp_grids.second << std::endl;
 		grids << dest.first << " " << dest.second << std::endl;
 
@@ -182,25 +193,25 @@ void Cell::func_grids_list(std::stack<Pair> grids_stack, Pair& dest) {
 bool Cell::func_checking_neighbours(int pathx, int pathy) {
 
 	if (m_direction == UP) {
-		if (scheme[pathx][pathy - 1] == EMPT || scheme[pathx][pathy - 1] == WAY) {
+		if (scheme[pathy -1][pathx] == EMPT || scheme[pathy -1][pathx] == WAY) {
 			return true;
 		}
 	}
 
 	else if (m_direction == RIGHT) {
-		if (scheme[pathx + 1][pathy] == EMPT || scheme[pathx + 1][pathy] == WAY) {
+		if (scheme[pathy][pathx +1] == EMPT || scheme[pathy][pathx +1] == WAY) {
 			return true;
 		}
 	}
 
 	else if (m_direction == DOWN) {
-		if (scheme[pathx][pathy + 1] == EMPT || scheme[pathx][pathy + 1] == WAY) {
+		if (scheme[pathy +1][pathx] == EMPT || scheme[pathy +1][pathx] == WAY) {
 			return true;
 		}
 	}
 
 	else if (m_direction == LEFT) {
-		if (scheme[pathx - 1][pathy] == EMPT || scheme[pathx - 1][pathy] == WAY) {
+		if (scheme[pathy][pathx -1] == EMPT || scheme[pathy][pathx -1] == WAY) {
 			return true;
 		}
 	}
@@ -209,16 +220,16 @@ bool Cell::func_checking_neighbours(int pathx, int pathy) {
 
 void Cell::func_checking_for_obstacles(int pathx, int pathy) {
 
-	if (pathy - 1 > 0 && scheme[pathx][pathy - 1] == BLCKD ) {
+	if (pathy - 1 > 0 && scheme[pathy -1][pathx] == BLCKD ) {
 		m_direction = UP;
 	}
-	else if (pathx + 1 < scheme_size.first && scheme[pathx + 1][pathy] == BLCKD) {
+	else if (pathx + 1 < scheme_size.first && scheme[pathy][pathx +1] == BLCKD) {
 		m_direction = RIGHT;
 	}
-	else if (pathy + 1 < scheme_size.second && scheme[pathx][pathy + 1] == BLCKD) {
+	else if (pathy + 1 < scheme_size.second && scheme[pathy +1][pathx] == BLCKD) {
 		m_direction = DOWN;
 	}
-	else if (pathx - 1 > 0 && scheme[pathx - 1][pathy] == BLCKD) {
+	else if (pathx - 1 > 0 && scheme[pathy][pathx -1] == BLCKD) {
 		m_direction = LEFT;
 	}
 	else {
@@ -226,7 +237,7 @@ void Cell::func_checking_for_obstacles(int pathx, int pathy) {
 	}
 }
 
-Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {	//po obruceniu schematu zamienic hor z vert i vert z hor
+Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {
 	bool test1 = false;
 	bool test2 = false;
 	Pair grids_straight = std::make_pair(pathx, pathy);
@@ -234,7 +245,7 @@ Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {
 	m_counter = 0;
 
 	if (direction == UP) {
-		while ((pathy - 1) >= 0 && (scheme[pathx][pathy - 1] == EMPT || scheme[pathx][pathy - 1] == VERTWAY) && count < step_size) {
+		while ((pathy - 1) >= 0 && (scheme[pathy -1][pathx] == EMPT || scheme[pathy -1][pathx] == HORWAY) && count < step_size) {
 			if (m_direction == LEFT || m_direction == RIGHT) {
 				if (func_checking_neighbours(pathx, pathy) == true) {
 					break;
@@ -262,7 +273,7 @@ Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {
 	}
 
 	else if (direction == RIGHT) {
-		while ((pathx + 1) < scheme_size.first && (scheme[pathx +1][pathy] == EMPT || scheme[pathx +1][pathy] == HORWAY) && count < step_size ) {
+		while ((pathx + 1) < scheme_size.first && (scheme[pathy][pathx +1] == EMPT || scheme[pathy][pathx +1] == VERTWAY) && count < step_size ) {
 			if (m_direction == DOWN || m_direction == UP) {
 				if (func_checking_neighbours(pathx, pathy) == true) {
 					break;
@@ -290,7 +301,7 @@ Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {
 	}
 
 	else if (direction == DOWN) {
-		while ((pathy + 1) < scheme_size.second && (scheme[pathx][pathy +1] == EMPT ||scheme[pathx][pathy +1] == VERTWAY) && count < step_size) {
+		while ((pathy + 1) < scheme_size.second && (scheme[pathy +1][pathx] == EMPT ||scheme[pathy +1][pathx] == HORWAY) && count < step_size) {
 			if (m_direction == LEFT || m_direction == RIGHT) {
 				if (func_checking_neighbours(pathx, pathy) == true) {
 					break;
@@ -318,7 +329,7 @@ Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {
 	}
 
 	else if (direction == LEFT) {
-		while ((pathx - 1) >= 0 && (scheme[pathx -1][pathy] == EMPT || scheme[pathx -1][pathy] == HORWAY) && count < step_size) {
+		while ((pathx - 1) >= 0 && (scheme[pathy][pathx -1] == EMPT || scheme[pathy][pathx -1] == VERTWAY) && count < step_size) {
 			if ( m_direction == DOWN || m_direction == UP) {
 				if (func_checking_neighbours(pathx, pathy) == true) {
 					break;
@@ -350,7 +361,7 @@ Pair Cell::func_straight_path(int pathx, int pathy, char direction, Pair dest) {
 }
 
 bool Cell::func_checking_collision(const int x, const int y) {
-	if (scheme[x][y] == BLCKD) {
+	if (scheme[y][x] == BLCKD) {
 		return true;
 	}
 	return false;
@@ -365,16 +376,17 @@ bool Cell::func_making_moves(int temp_x, int temp_y, double temp_dist_start, Pai
 	if (y >= 0 && y < scheme_size.first &&  x >= 0 && x < scheme_size.first && Cell::func_checking_collision(x, y) == false) {
 
 		if (y >= 0 && y < scheme_size.first &&  x >= 0 && x < scheme_size.first && func_checking_destination(x, y, dest) == true) {
-			elem_info[x][y].m_parent_x = parent.first;
-			elem_info[x][y].m_parent_y = parent.second;
+			elem_info[y][x].m_parent_x = parent.first;
+			elem_info[y][x].m_parent_y = parent.second;
 			return true;
 		}
-		/*
-		else if (y >= 0 && y < scheme_size.first &&  x >= 0 && x < scheme_size.first && visited[x][y] == false && onstack[x][y] == false ) {
+		
+		else if (y >= 0 && y < scheme_size.first &&  x >= 0 && x < scheme_size.first && visited[y][x] == false && onstack[y][x] == false ) {
+			/*
 			if (test == true && scheme[x][y] == WAY) {
 			}
 			*/
-			else if (y >= 0 && y < scheme_size.first &&  x >= 0 && x < scheme_size.first) {
+			// if (y >= 0 && y < scheme_size.first &&  x >= 0 && x < scheme_size.first) {
 				if (direction == UP || direction == DOWN) {
 					if (sqrt((dest.second - y)*(dest.second - y)) < (dest.second - parent.second)*(dest.second - parent.second)) {
 						cell_grids = func_straight_path(x, y, direction, dest);
@@ -389,32 +401,32 @@ bool Cell::func_making_moves(int temp_x, int temp_y, double temp_dist_start, Pai
 						y = cell_grids.second;
 					}
 				}
-				if ((direction == RIGHT || direction == LEFT) && scheme[x][y] != VERTWAY) {	//po obruceniu schematu zamienic hor z vert i vert z hor
-					if (visited[x][y] == false) {
-						elem_info[x][y].m_parent_x = parent.first;
-						elem_info[x][y].m_parent_y = parent.second;
+				if ((direction == RIGHT || direction == LEFT) && scheme[y][x] != HORWAY) {
+					if (visited[y][x] == false) {
+						elem_info[y][x].m_parent_x = parent.first;
+						elem_info[y][x].m_parent_y = parent.second;
 					}
-					elem_info[x][y].m_dist_start = temp_dist_start + (m_counter / 2);
-					elem_info[x][y].m_dist_target = func_checking_path(x, y, dest);
-					elem_info[x][y].m_dist_whole = elem_info[x][y].m_dist_start + elem_info[x][y].m_dist_target;
+					elem_info[y][x].m_dist_start = temp_dist_start + (m_counter / 2);
+					elem_info[y][x].m_dist_target = func_checking_path(x, y, dest);
+					elem_info[y][x].m_dist_whole = elem_info[y][x].m_dist_start + elem_info[y][x].m_dist_target;
 
-					short_dist.push(std::make_pair(elem_info[x][y].m_dist_whole, std::make_pair(x, y)));
-					onstack[x][y] = true;
+					short_dist.push(std::make_pair(elem_info[y][x].m_dist_whole, std::make_pair(x, y)));
+					onstack[y][x] = true;
 				}
-				else if ((direction == UP|| direction == DOWN) && scheme[x][y] != HORWAY) {
-					if (visited[x][y] == false) {
-						elem_info[x][y].m_parent_x = parent.first;
-						elem_info[x][y].m_parent_y = parent.second;
+				else if ((direction == UP|| direction == DOWN) && scheme[y][x] != VERTWAY) {
+					if (visited[y][x] == false) {
+						elem_info[y][x].m_parent_x = parent.first;
+						elem_info[y][x].m_parent_y = parent.second;
 					}
-					elem_info[x][y].m_dist_start = temp_dist_start + (m_counter / 2);
-					elem_info[x][y].m_dist_target = func_checking_path(x, y, dest);
-					elem_info[x][y].m_dist_whole = elem_info[x][y].m_dist_start + elem_info[x][y].m_dist_target;
+					elem_info[y][x].m_dist_start = temp_dist_start + (m_counter / 2);
+					elem_info[y][x].m_dist_target = func_checking_path(x, y, dest);
+					elem_info[y][x].m_dist_whole = elem_info[y][x].m_dist_start + elem_info[y][x].m_dist_target;
 
-					short_dist.push(std::make_pair(elem_info[x][y].m_dist_whole, std::make_pair(x, y)));
-					onstack[x][y] = true;
+					short_dist.push(std::make_pair(elem_info[y][x].m_dist_whole, std::make_pair(x, y)));
+					onstack[y][x] = true;
 				}
-			}
-		//}
+			//}
+		}
 	}
 	return false;
 }
@@ -446,26 +458,26 @@ void Cell::func_finding_best_path(Pair& start, Pair& dest, int steps) {	//pomysl
 	//bool test = false;	
 	test = false;
 
-	elem_info[start.first][start.second].m_dist_start = 0.0;
-	elem_info[start.first][start.second].m_dist_target = func_checking_path(x, y, dest);
-	elem_info[start.first][start.second].m_dist_whole = func_checking_path(x, y, dest);
-	elem_info[start.first][start.second].m_parent_x = parent.first;	
-	elem_info[start.first][start.second].m_parent_y = parent.second;
+	elem_info[start.second][start.first].m_dist_start = 0.0;
+	elem_info[start.second][start.first].m_dist_target = func_checking_path(x, y, dest);
+	elem_info[start.second][start.first].m_dist_whole = func_checking_path(x, y, dest);
+	elem_info[start.second][start.first].m_parent_x = parent.first;	
+	elem_info[start.second][start.first].m_parent_y = parent.second;
 
-	visited[start.first][start.second] = true;
+	visited[start.second][start.first] = true;
 
 	double temp_dist_start;
 	temp_dist_start = 0.0;	
 
-	short_dist.push(std::make_pair(elem_info[start.first][start.second].m_dist_whole, std::make_pair(x, y)));
+	short_dist.push(std::make_pair(elem_info[start.second][start.first].m_dist_whole, std::make_pair(x, y)));
 
 	while (!short_dist.empty()) {
 
 		test = false;
 
 		if (func_checking_destination(short_dist.top().second.first, short_dist.top().second.second, dest) == true) {
-			elem_info[short_dist.top().second.first][short_dist.top().second.second].m_parent_x = parent.first;
-			elem_info[short_dist.top().second.first][short_dist.top().second.second].m_parent_y = parent.second;
+			elem_info[short_dist.top().second.second][short_dist.top().second.first].m_parent_x = parent.first;
+			elem_info[short_dist.top().second.second][short_dist.top().second.first].m_parent_y = parent.second;
 			break;
 		}
 		
@@ -475,16 +487,16 @@ void Cell::func_finding_best_path(Pair& start, Pair& dest, int steps) {	//pomysl
 		parent.second = temp_y;
 		short_dist.pop();
 
-		temp_dist_start = elem_info[temp_x][temp_y].m_dist_start;
+		temp_dist_start = elem_info[temp_y][temp_x].m_dist_start;
 		
-		elem_info[temp_x][temp_y].m_dist_target = func_checking_path(temp_x, temp_y, dest);
-		elem_info[temp_x][temp_y].m_dist_whole = temp_dist_start + func_checking_path(temp_x, temp_y, dest);
+		elem_info[temp_y][temp_x].m_dist_target = func_checking_path(temp_x, temp_y, dest);
+		elem_info[temp_y][temp_x].m_dist_whole = temp_dist_start + func_checking_path(temp_x, temp_y, dest);
 
-		visited[temp_x][temp_y] = true;
+		visited[temp_y][temp_x] = true;
 
 		func_checking_for_obstacles(temp_x, temp_y);
 
-		if (scheme[temp_x][temp_y] == WAY) {
+		if (scheme[temp_y][temp_x] == WAY) {
 			test = true;
 		}
 
@@ -492,6 +504,7 @@ void Cell::func_finding_best_path(Pair& start, Pair& dest, int steps) {	//pomysl
 		std::cout << /*elem_info[temp_x][temp_y].m_dist_start << " " << elem_info[temp_x][temp_y].m_dist_whole << " " << */temp_x << " " << temp_y << std::endl;
 #endif	
 		//UP//
+
 		if (func_making_moves(temp_x, (temp_y - 1), temp_dist_start, start, dest, parent, UP) == true) {
 			break;
 		}
