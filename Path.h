@@ -39,12 +39,27 @@ struct element {
 
 class Cell {
 private:
-	char m_direction;
+	//char m_direction;
 	double m_counter = 0;
 	Pair scheme_size;
+	bool file_ok = true;
 	
-	
+
+	enum direction {
+		up = 0,
+		right = 1,
+		down = 2,
+		left = 3,
+		non = 4,
+		horizontal = 5,
+		vertical = 6
+
+
+	};
+
+	direction direct;
 	int x, y;
+	int frame_size;
 	bool test;
 	int  step_size;
 	std::priority_queue<Pair_d_p, std::vector<Pair_d_p>, std::greater<Pair_d_p>> short_dist;
@@ -66,7 +81,7 @@ private:
 	double func_checking_path(const int, const int, Pair&);
 	void func_drawing_path(Pair&, Pair&);
 	bool func_checking_collision(const int, const int);
-
+	void func_cleaning();
 public:
 	
 	Cell(std::string filename) {
@@ -85,15 +100,15 @@ public:
 			char a = ASCII_0;
 
 			while (!sheet.eof()) {
-				scheme.push_back(std::vector<int>());
-				elem_info.push_back(std::vector<element>());
-				visited.push_back(std::vector<bool>());
-				onstack.push_back(std::vector<bool>());
+				scheme.emplace_back(std::vector<int>());
+				elem_info.emplace_back(std::vector<element>());
+				visited.emplace_back(std::vector<bool>());
+				onstack.emplace_back(std::vector<bool>());
 
 				i = 0;
 				while ((a = sheet.get()) != '\n' && !sheet.eof()) {	
 					
-					scheme[j].push_back(a);
+					scheme[j].emplace_back(a);
 					
 					if (scheme[j][i] == ASCII_1) {
 						scheme[j][i] = WAY;
@@ -111,26 +126,29 @@ public:
 						scheme[j][i] = VERTWAY;
 					}
 					
-					elem_info[j].push_back(element());
+					elem_info[j].emplace_back(element());
 					elem_info[j][i].m_dist_whole = INF;
-					visited[j].push_back(false);
-					onstack[j].push_back(false);
+					visited[j].emplace_back(false);
+					onstack[j].emplace_back(false);
 
 					i++;
 				}
+				if ( !sheet.eof() && j > 0 && i != scheme_size.first) {
+#ifdef _DEBUG
+					std::cout << "Scheme error" << std::endl;
+#endif
+					file_ok = false;
+					break;
+				}
+				scheme_size.first = i;
 				a = ASCII_0;
 				j++;
 			}
 			sheet.close();
-			scheme_size.first = i;
 			scheme_size.second = j;
 		}
-		
 	}
 
 	void fun_printing_map();
-	void func_finding_best_path(Pair&, Pair&, int);
-	
-	//Pair func_checking_scheme_size(std::string file);
-	//bool func_reading_map(std::string file);
+	void func_finding_best_path(Pair&, Pair&, int, int);
 };
