@@ -5,6 +5,7 @@
 #include <utility>
 #include <stack>
 #include <fstream>
+#include <string>
 #include <vector>
 
 #define EMPT 0
@@ -41,18 +42,18 @@ class Cell {
 private:
 	//char m_direction;
 	double m_counter = 0;
-	Pair scheme_size;
+	//Pair scheme_size;
 	bool file_ok = true;
 	
 
 	enum direction {
-		up = 0,
-		right = 1,
-		down = 2,
-		left = 3,
-		non = 4,
-		horizontal = 5,
-		vertical = 6
+		up,
+		right,
+		down,
+		left,
+		non,
+		horizontal,
+		vertical
 
 
 	};
@@ -63,6 +64,7 @@ private:
 	bool test;
 	int  step_size;
 	std::priority_queue<Pair_d_p, std::vector<Pair_d_p>, std::greater<Pair_d_p>> short_dist;
+	//std::stack<Pair> grids_stack;
 
 	std::vector<std::vector<element>> elem_info;
 	std::vector<std::vector<int>> scheme;
@@ -71,18 +73,19 @@ private:
 
 	Pair func_straight_path(int, int, char, Pair dest);
 	void func_drawing_way(Pair&, Pair&);
-	void func_grids_list(std::stack<Pair>, Pair&);
+	
 
 	bool func_making_moves(int, int, double, Pair&, Pair&, Pair&, char);
 	bool func_checking_neighbours(int, int);
 	void func_checking_for_obstacles(int, int);
 	bool func_checking_destination(const int, const int, Pair&);
-	bool func_checking_cell(Pair&);
 	double func_checking_path(const int, const int, Pair&);
+	void func_grids_list(std::stack<Pair>, Pair&);
 	void func_drawing_path(Pair&, Pair&);
 	bool func_checking_collision(const int, const int);
-	void func_cleaning();
+	
 public:
+	Pair scheme_size;
 	
 	Cell(std::string filename) {
 
@@ -149,6 +152,9 @@ public:
 		}
 	}
 
+	bool func_checking_cell(Pair&);
 	void fun_printing_map();
 	void func_finding_best_path(Pair&, Pair&, int, int);
+	void func_printing_map_and_path(int);
+	void func_cleaning();
 };
