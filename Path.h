@@ -40,9 +40,7 @@ struct element {
 
 class Cell {
 private:
-	//char m_direction;
 	double m_counter = 0;
-	//Pair scheme_size;
 	bool file_ok = true;
 	
 
@@ -60,11 +58,11 @@ private:
 
 	direction direct;
 	int x, y;
-	int frame_size;
+	int hor_frame_size;
+	int vert_frame_size;
 	bool test;
 	int  step_size;
 	std::priority_queue<Pair_d_p, std::vector<Pair_d_p>, std::greater<Pair_d_p>> short_dist;
-	//std::stack<Pair> grids_stack;
 
 	std::vector<std::vector<element>> elem_info;
 	std::vector<std::vector<int>> scheme;
@@ -154,7 +152,7 @@ public:
 
 	bool func_checking_cell(Pair&);
 	void fun_printing_map();
-	void func_finding_best_path(Pair&, Pair&, int, int);
+	void func_finding_best_path(Pair&, Pair&, int, int, int);
 	void func_printing_map_and_path(int);
 	void func_cleaning();
 };
